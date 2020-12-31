@@ -1,0 +1,947 @@
+/**
+ * Project: Culminating
+ * Programmer: Usman Minhas
+ * Program: Jay's NoFrills
+ * Date: January 22, 2019
+ * Description: This program mimics an online grocery store
+ */
+
+package code;
+
+//Imports
+import java.io.*;
+import java.util.Scanner;
+
+public class Code {
+
+    public static void main(String[] args) throws IOException{
+        
+        //Declare All Variable, Scanners 
+        Scanner scanS = new Scanner(System.in);
+        Scanner scanN = new Scanner(System.in);
+        String filename, username = null;
+        int option, sortChoice;
+        
+        //Create user cart
+        Cart cart = new Cart();
+        
+        //Welcome message
+        System.out.println("Welcome to Jay's NoFrills!");
+        
+        //Print statement to allow user to know what their options are 
+        do {//Error traps selection
+                System.out.println("\n1. Sign up");
+                System.out.println("2. Log in");
+                option = scanN.nextInt();
+                
+                if(option != 1 && option != 2) {
+                    System.err.println("You have entered an incorrect option!");
+                }
+        }while(option != 1 && option != 2);
+        
+
+        /**
+        *Switch statement - to allow the user to choose between 
+        *log in or sign in 
+        **/
+        switch (option) {
+            //if user chooses 1 as their choice 
+            case 1: {
+                //delcaring variables 
+                String password, email, name , securityQuestion;
+
+                //Ask user to input data required to make an account
+                //and then further collect the data 
+                System.out.print("Enter Full Name: ");
+                name = scanS.nextLine();
+
+                System.out.print("Please enter your email: ");
+                email = scanS.nextLine();
+
+                System.out.print("Please enter your username: ");
+                username = scanS.nextLine();
+                
+                System.out.println("Security question.....");
+                System.out.print("What is your favorite type of food: ");
+                securityQuestion = scanS.nextLine();
+
+                System.out.print("Please enter a password: ");
+                password = scanS.nextLine();
+
+                //Calls upon the login method for the user  
+                FileWriter fWriter = new FileWriter("H:\\" + 
+                        username + ".txt", false);
+                PrintWriter accounts = new PrintWriter(fWriter);
+                accounts.println(password);
+                accounts.println(securityQuestion);
+                accounts.close();
+                System.out.println("Please prepare to login with your "
+                        + "account...");
+                login();
+                break;
+            }//end of case 1 
+
+            case 2: {
+                username = login();
+                break;
+                
+            }//end of case 2
+            
+        }//end of swtich statement
+            
+        //ask user what they want to do
+        do{
+            do {//Displays menu and error traps selection
+                System.out.println("What operation would you like to perform?"
+                        + "\n(Please type in the option number of your choice)"
+                        + "\n 1) Purchase Items" 
+                        + "\n 2) Remove Items"
+                        + "\n 3) View Cart"
+                        + "\n 4) View Account"
+                        + "\n 5) Checkout"
+                        + "\n 6) View Last Order"
+                        + "\n 7) Exit");
+        
+                //get input
+                option = scanN.nextInt();
+            
+                    if(option < 0 || option > 7) {
+                    System.err.println("You have entered an incorrect option!");
+                }
+            } while(option < 0 || option > 7);//End of do while
+        
+        
+            //Switch for the options when they are logged in
+            switch (option) {
+                case 1: {//Case for menu options
+                    do{//Error traps sort choice
+                        System.out.println("How would you like to sort it?");
+                        System.out.println("1. Alphabetically\n2. Price "
+                                + "(Low to High)"
+                                + "\n3. Price (High to Low)\n4. Search");
+                        sortChoice = scanN.nextInt();
+                        switch (sortChoice) {//Case for sorting method
+                            case 1:{
+                                cart.alphabetical();
+                                cart.display();
+                                buy(cart);
+                                break;
+                            }
+                            case 2:{
+                                cart.priceL2H();
+                                cart.display();
+                                buy(cart);
+                                break;
+                            }
+                            case 3:{
+                                cart.priceH2L();
+                                cart.display();
+                                buy(cart);
+                                break;
+                            }
+                            case 4:{
+                                //Asks them what item they want
+                                String item;
+                                System.out.println("Enter Item Name:");
+                                item = scanS.nextLine();
+                                cart.search(item);
+                                break;
+                            }
+                            default:{
+                                System.err.println("INVALID ENTRY");
+                                break;
+                            }
+                        }//End of switch
+                    }while(sortChoice < 0 || sortChoice > 4);//End of do while
+                    break;
+                }
+                case 2: {
+                    cart.removeCart();
+                    break;
+                }
+                case 3: {
+                    cart.viewCart();
+                    break;
+                }
+                case 4: {
+                    cart.viewAccount(username);
+                    break;
+                }
+                case 5: {
+                    cart.checkOut(username);
+                    break;
+                }
+                case 6: {
+                    cart.viewLastOrder(username);
+                    break;
+                }
+                case 7: {
+                    System.out.println("Thank's For Shopping");
+                    System.exit(0);
+                    break;
+                }
+            }//End of switch
+        }while (option != 7);//End of do while
+      
+    
+    }//end of main
+    
+    /***************************************************************
+     * login - Allows the user to login as well as reset password
+     * @return - Returns the username
+     * @throws IOException 
+     **************************************************************/
+    public static String login() throws IOException{
+                    
+        //Declare Vairables and Scanner
+        String checkUS, checkPass, newPass, securityQuestion, answer, password,
+                name, email;
+        Scanner scanS = new Scanner(System.in);
+        File file;
+
+        //ask user to enter their username 
+        do{//Do while to error trap
+            System.out.print("Enter Username: ");
+            checkUS = scanS.nextLine();
+            file = new File("H:\\" + checkUS + ".txt");
+            
+            if(!file.exists()){//Checks if users file exists
+                System.err.println("Incorrect Username!");
+            }
+        }while(!file.exists());
+
+        //ask user to enter their password 
+        System.out.print("Enter Password: ");
+        checkPass = scanS.nextLine();
+
+        //Decalre scanner
+        Scanner myFile = new Scanner(file);
+        
+        //Read file
+        String line = myFile.nextLine();
+        String lineTwo = myFile.nextLine();
+        
+        //Store as password and answer
+        password = line;
+        answer = lineTwo;
+        
+        /**
+        *Check the password and username
+        *if the password is the same and username is the same. 
+        **/
+       if (password.equalsIgnoreCase(checkPass)) {
+           System.out.println("Welcome!!");
+                    } //else if the password is the same and username is diff. 
+        else if (!password.equalsIgnoreCase(checkPass)) {
+
+        //allow the user to enter in their password 
+        do {//Runs loop while password is wrong
+            //display kind message and allow them to re - enter
+            System.out.println("Sorry your password was"
+            + " wrong.");
+            System.out.println("Re - Enter your Password.");
+            System.out.print("Password: ");
+            checkPass = scanS.nextLine();
+            
+            if (password.equalsIgnoreCase(checkPass)) {
+                System.out.println("Welcome!! ");
+                            }
+            
+            else {
+                
+                String ans = null;
+                
+                do{//Error traps selection
+                    //ask if they want to reset the username
+                    System.out.print("Do you want to reset the password: ");
+                    ans = scanS.nextLine();
+                    
+                    //Error message display
+                    if(!ans.equalsIgnoreCase("Yes") && 
+                            !ans.equalsIgnoreCase("No")){
+                        System.err.println("INVALID ENTRY");
+                    }
+                }while(!ans.equalsIgnoreCase("Yes") && 
+                        !ans.equalsIgnoreCase("No"));
+                
+                //If the user wants to reset their password 
+                if (ans.equalsIgnoreCase("Yes")) {
+                    //Asks for details
+                    System.out.print("Enter Full Name: ");
+                    name = scanS.nextLine();
+
+                    System.out.print("Please enter your email: ");
+                    email = scanS.nextLine();
+
+                    do{//Error traps wrong username
+                        System.out.print("Enter Username: ");
+                        checkUS = scanS.nextLine();
+                        file = new File("H:\\" + checkUS + ".txt");
+                        
+                        if(!file.exists()) {
+                                System.err.println("Incorrect Username!");
+                        }
+                    }while(!file.exists());
+
+                    do {//Error traps secuirity question answer
+                        System.out.println("Security question.....");
+                        System.out.print("What is your favorite type of"
+                                + " food: ");
+                        securityQuestion = scanS.nextLine();
+                        if(!securityQuestion.equalsIgnoreCase(answer)) {
+                            System.err.println("Wrong Security Question!");
+                            System.exit(0);
+                        }
+                    }while(securityQuestion.equals(answer));
+                    
+                    //If statement for if the security question is correct
+                    if(securityQuestion.equalsIgnoreCase(answer)) {
+                           
+                        //allow them to re enter their new password 
+                        System.out.println("Enter new Password: ");
+                        newPass = scanS.nextLine();
+                                  
+                        //open users file and add newPass into it. 
+                        FileWriter fwriter = new FileWriter(checkUS + ".txt",
+                                false);
+                        PrintWriter accounts = new PrintWriter(fwriter);
+                        accounts.println(newPass);
+                        accounts.println(securityQuestion);
+                        accounts.close();
+                    }
+                    break;
+                }   
+                else {
+                    System.out.println("Thank you for using our program!");
+                    System.exit(0);
+                }
+            }//end of else
+                                          
+            } while (!password.equalsIgnoreCase(checkPass));
+                        
+            //print out a welcome sign for welcoming user into program
+            System.out.println("Welcome!!!");
+         
+        }//end of else if
+                    
+       return checkUS;
+    }//end of method
+    
+    public static void buy(Cart cart){
+        //Variables
+        int itemnum;
+        String amount;
+        boolean overstock =  false;
+        
+        //Scanners
+        Scanner scanN = new Scanner(System.in);
+        Scanner scanS = new Scanner(System.in);
+        
+        do{//Error traps incorrect choice
+            
+            System.out.println("Which item would you like?");
+            itemnum = scanN.nextInt();
+            
+            if(cart.inventorySize() < (itemnum)){
+                System.err.println("INVALID ENTRY");
+            }
+            
+        }while(cart.inventorySize() < (itemnum));
+        
+        do{//Error traps overstock
+            do{//Error traps negative input
+                System.out.println("How many would you like?");
+                amount = scanS.nextLine();
+                if(Integer.parseInt(amount) < 1){
+                    System.err.println("INVALID ENTRY");
+                }
+            }while(Integer.parseInt(amount) < 1);
+            
+            overstock = cart.addCart(itemnum, amount);
+            
+            if(overstock == true){
+                System.err.println("INVALID ENTRY");
+            }
+            
+        }while (overstock == true);
+        
+        
+    }//End of buy method
+    
+}//End of program
+
+
+
+
+/**
+ * Class: Inventory
+ * Programmer: Usman Minhas, Jay Cordeiro, Sarada Sai Turaga
+ * Program: Jay's NoFrills
+ * Date: January 22, 2019
+ * Description: This class contains an array with all the inventory and each
+ * items prices
+ */
+package code;
+
+//Imports
+import java.io.*;
+import java.util.Scanner;
+import java.util.Random;
+import java.util.ArrayList;
+import java.text.DecimalFormat;
+
+public class Inventory {
+    
+    //Created arraylists that will hold the inventory details with prices
+    protected ArrayList <String> items = new ArrayList<>();
+    protected ArrayList <String> stock = new ArrayList<>();
+    protected ArrayList <String> prices = new ArrayList<>();
+    
+    /**
+     * Inventory - Reads file and put price, stock and item name in an 
+     * arraylist
+     * @throws IOException 
+     */
+    public Inventory() throws IOException{
+        
+        /***************************************
+         * FOR MR JANICAS: Make sure the inventory Text File is in your H drive
+         */
+        
+        //Opens file and scanner to read it
+        File invent = new File("H:\\Inventory.txt");
+        Scanner readFile = new Scanner(invent);
+        
+        //Decalre random numbers
+        Random amount = new Random();
+        
+        //Varibales for counter and stock
+        int i = 0, g;
+        
+        //Loop reads the entire inventory file
+        while(readFile.hasNext()){
+            String line = readFile.nextLine();
+            
+            //Splits the item name and price using a colon
+            String [] tokens = line.split(":");
+            
+            //Assigns [rice and name to arraylist
+            items.add(tokens[0]);
+            prices.add(tokens[1]);
+            
+            //Assigns a rnadom number to the stock
+            g = amount.nextInt(100) ;
+            stock.add(Integer.toString(g));
+            
+            i++;
+        }
+        
+    }//End of constructor
+    
+    /**
+     * Alphabetical - Sorts items by alphabet
+     */
+    public void alphabetical(){
+        
+        //Declare vairbales to hold minimums
+        String minValueI, minValueP, minValueS;
+        int minIndex;
+        
+        for (int i = 0; i < items.size(); i++) 
+        { 
+            //Keeps track of the item name and its corresponding price/stock
+            minValueI = items.get(i); 
+            minValueP = prices.get(i); 
+            minValueS = stock.get(i); 
+            minIndex = i; 
+            
+            //Moves through the array until a lower item name is found
+            for (int j = i + 1; j < items.size(); j++) 
+            { 
+                if (items.get(j).compareToIgnoreCase(minValueI) < 0) 
+                { 
+                    
+                    //Stores the new lowest value discovered
+                    minValueI = items.get(j);
+                    minValueP = prices.get(j); 
+                    minValueS = stock.get(j); 
+                    minIndex = j; 
+                } 
+            }      
+            
+            //After checking the entire array the first name is switched 
+            items.set(minIndex, items.get(i));
+            items.set(i, minValueI);
+            prices.set(minIndex, prices.get(i));
+            prices.set(i, minValueP);
+            stock.set(minIndex, stock.get(i));
+            stock.set(i, minValueS);
+        }  
+    }//End of method
+    
+    /**
+     * PriceL2H - Sort from lowest to highest price
+     */
+    public void priceL2H(){
+        
+        //Declare vairbales to hold minimums
+        double minValueP;
+        int minIndex;
+        String minValueI, minValueS;
+        
+        for (int i = 0; i < prices.size(); i++) 
+        { 
+            
+            //Keeps track of the item price and its corresponding name/stock
+            minValueI = items.get(i); 
+            //Parse to double for comparison
+            minValueP = Double.parseDouble(prices.get(i));
+            minValueS = stock.get(i); 
+            minIndex = i; 
+            
+            //Moves through the array until a lower item price is found
+            for (int j = i + 1; j < prices.size(); j++) 
+            { 
+                if (Double.parseDouble(prices.get(j)) < minValueP) 
+                { 
+                    
+                    //Stores the new lowest value discovered
+                    minValueI = items.get(j);
+                    minValueP = Double.parseDouble(prices.get(j)); 
+                    minValueS = stock.get(j); 
+                    minIndex = j; 
+                } 
+            }      
+            
+            //After checking the entire array the first name is switched
+            items.set(minIndex, items.get(i));
+            items.set(i, minValueI);
+            prices.set(minIndex, prices.get(i));
+            prices.set(i, Double.toString(minValueP));
+            stock.set(minIndex, stock.get(i));
+            stock.set(i, minValueS);
+        }  
+    }//End of method
+    
+    /**
+     * PriceH2L - Sort from price high to low
+     */
+    public void priceH2L(){
+        
+        //Declare vairbales to hold minimums
+        double minValueP;
+        int minIndex;
+        String minValueI, minValueS;
+        
+        for (int i = 0; i < prices.size(); i++) 
+        { 
+            
+            //Keeps track of the item price and its corresponding name/stock
+            minValueI = items.get(i); 
+            //Parse to double for comparison
+            minValueP = Double.parseDouble(prices.get(i));
+            minValueS = stock.get(i); 
+            minIndex = i; 
+            
+            //Moves through the array until a lower item price is found
+            for (int j = i + 1; j < prices.size(); j++) 
+            { 
+                if (Double.parseDouble(prices.get(j)) > minValueP) 
+                { 
+                    
+                    //Stores the new lowest value discovered
+                    minValueI = items.get(j);
+                    minValueP = Double.parseDouble(prices.get(j)); 
+                    minValueS = stock.get(j); 
+                    minIndex = j; 
+                } 
+            }      
+            
+            //After checking the entire array the first name is switched
+            items.set(minIndex, items.get(i));
+            items.set(i, minValueI);
+            prices.set(minIndex, prices.get(i));
+            prices.set(i, Double.toString(minValueP));
+            stock.set(minIndex, stock.get(i));
+            stock.set(i, minValueS);
+        }  
+    }//End of method
+    
+    /**
+     * Display - Prints out the inventory with prices
+     */
+    public void display(){
+        
+        //Decimal format to display cents
+        DecimalFormat round = new DecimalFormat("0.00");
+        
+        //Allows print out to be formatted to the left
+        String format = "%-40s%s%n";
+        
+        //Headers
+        System.out.println("    ITEM\t\t\t\tPRICE");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                + "~~~~");
+        
+        //Loop to print out the entire inventory with prices
+        for(int i = 0; i < items.size(); i++){
+            
+            if (i < 9){
+                System.out.print((i + 1) + ".  ");
+            }
+            else{
+                System.out.print((i + 1) + ". ");
+            }
+            System.out.printf(format,  items.get(i), 
+                    round.format(Double.parseDouble(prices.get(i))));
+        }
+
+    }//End of method
+}//End of class
+/**
+ * Class: Cart
+ * Programmer: Usman Minhas, Jay Cordeiro, Sarada Sai Turaga
+ * Program: Jay's NoFrills
+ * Date: January 22, 2019
+ * Description: Contains cart items and prices
+ */
+package code;
+
+import java.io.*;
+import java.text.DecimalFormat;
+import java.util.Scanner;
+import java.util.ArrayList;
+
+
+public class Cart extends Inventory{
+    
+    //Feilds 
+    protected ArrayList <String> cartItems = new ArrayList<>();
+    protected ArrayList <String> cartPrices = new ArrayList<>();
+    protected ArrayList <String> cartAmount = new ArrayList<>();
+    
+    
+    /**
+     * Constructor
+     * @throws IOException 
+     */
+    public Cart() throws IOException{
+        super();
+    }
+    
+    /**
+     * inventorySize - returns the size of the inventory
+     * @return - size of inventory
+     */
+    public int inventorySize(){
+        return items.size();
+    }
+    
+    /**
+     * addCart - Adds item to cart with price and quantity
+     * @param itemnum - Contains index of item
+     * @param amount -  Contains quantity desired
+     * @return - Returns whether there is enough stock or not
+     */
+    public boolean addCart(int itemnum, String amount ){
+        
+        boolean overstock = false;
+        
+        //Checks to see if there is enough stock
+        if(Integer.parseInt(stock.get(itemnum - 1)) == 0){
+            System.err.println("\nOUT OF STOCK!\n");
+            overstock = false;
+        }
+        else if(Integer.parseInt(amount) > 
+                Integer.parseInt(stock.get(itemnum - 1))){
+            System.err.println("Sorry we don't have that many in stock");
+            System.err.println("We have " + stock.get(itemnum - 1) + " of " +
+                    items.get(itemnum - 1));
+            overstock = true;
+        }
+        else{
+            //Adds prices and item name to carts array lists
+            cartItems.add(items.get(itemnum - 1));
+            cartPrices.add(prices.get(itemnum - 1));
+            cartAmount.add(amount);
+            int garb = (Integer.parseInt(stock.get(itemnum - 1)) - 
+                    Integer.parseInt(amount));
+            stock.set((itemnum - 1), Integer.toString(garb));
+            overstock = false;
+        }
+        
+        return overstock;
+    }//end of AddCart
+    
+    /**
+     * @method - removeCart(allows the customer to remove items 
+     * from their cart)
+     */
+    public void removeCart(){
+        
+        Scanner scanN = new Scanner(System.in);   
+        
+        int itemNum = 0, i = 0;
+        boolean item =  false;
+    
+        viewCart();
+        
+        //Asks user to select which item to remove
+        do{//Error traps selection
+            System.out.println("Which item would you like to remove?");
+            itemNum = scanN.nextInt();
+            
+            if(cartItems.size() < itemNum || itemNum < 0){
+                System.err.println("INVALID ENTRY!");
+            }
+        }while(cartItems.size() < itemNum || itemNum < 0);
+        
+        while(item != true){//Adds stock back to the inventory
+            if(cartItems.get(itemNum - 1).equalsIgnoreCase(items.get(i))){
+                //Adds inventory back to stock from cart
+                int garb = (Integer.parseInt(stock.get(i)) + 
+                            Integer.parseInt(cartAmount.get(itemNum - 1)));
+                stock.set((i), Integer.toString(garb));
+                item = true;
+            }
+            else{
+                i++;
+            }
+        }
+            
+        //Removes that item from all array lists
+        cartItems.remove(itemNum - 1);
+        cartPrices.remove(itemNum - 1);
+        cartAmount.remove(itemNum - 1);
+    }//end of Remove Cart
+    /**
+     * @method - viewAccount(allows customer to see their account) 
+     * @param username
+     * @throws IOException 
+     */
+    public void viewAccount(String username) throws IOException {
+        // Open the file 
+        File myfile = new File("H:\\" + username + ".txt");
+        
+        Scanner inputFile = new Scanner(myfile);
+
+            while(inputFile.hasNext()){
+                
+                // Read the data from the file
+                String line = inputFile.nextLine();
+                
+                System.out.println(line);
+            }//end of while.hasNext()
+            
+        // Close the file
+        inputFile.close();
+        
+    }//end of ViewAccount 
+    /**
+     * @method - viewCart(displays cart)
+     */
+    public void viewCart(){
+        String format = "%-40s%s%n";//For indentation
+        System.out.printf(format, "Items", "Number");
+        
+        if(cartItems.size() >= 1){//Error traps displaying empty cart
+            System.out.println("*********************************************");
+            for (int i = 0; i < cartItems.size(); i++){
+                System.out.print((i + 1) + ". ");
+                System.out.printf(format, cartItems.get(i), cartAmount.get(i));
+            }//end of for loop
+            
+            System.out.println("*********************************************");
+        }
+        else{
+            System.err.println("NOTHING IN CART!");
+        }
+        
+        
+    }//end of viewAccount method
+    
+    /**
+     * @method – Checks out user and displays receipt
+     * @Param - String username
+     */
+    public void checkOut(String username) throws IOException{
+        
+        //Variables
+        double  total = 0;
+        String format = "%-40s%s%n";//For indenation
+        DecimalFormat round = new DecimalFormat ("0.00");
+        
+        //Checks to ensure cart is not empty
+        if (cartItems.size() >= 1){
+            //Calculates total
+            for(int i = 0; i < cartItems.size();i++)
+            {
+                total += (Double.parseDouble(cartPrices.get(i))) * 
+                        (Double.parseDouble(cartAmount.get(i)));
+            }//end of for loop 
+
+            //Create Scanner 
+            Scanner scanS = new Scanner(System.in);
+            String userAns;
+
+            //Asks if they want a receipt
+            do{//Error traps selection
+                System.out.print("Do you want the Receipt: ");
+                userAns = scanS.nextLine();
+                if(!(userAns.equalsIgnoreCase("Yes")) && 
+                        !(userAns.equalsIgnoreCase("No"))){
+                    System.err.println("INVALID ENTRY!");
+                }
+            }while(!(userAns.equalsIgnoreCase("Yes")) && 
+                    !(userAns.equalsIgnoreCase("No")));
+
+            //Prints out reciept
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~RECEIPT~~~~~~~"
+                    + "~~~~~~~~~~~~~~~");
+            for (int i = 0; i < cartItems.size(); i++){
+                        System.out.printf(format, cartItems.get(i), 
+                        round.format((Double.parseDouble(cartPrices.get(i))) * 
+                        (Double.parseDouble(cartAmount.get(i))))); 
+                    }//end of for loop
+
+            System.out.println("Total: " + round.format(total));
+
+            //Saves receipt in file
+            if(userAns.equalsIgnoreCase("Yes")){
+
+                FileWriter fwriter = new FileWriter("H:\\" + username +
+                        "Receipts.txt", false) ;
+                PrintWriter outFile = new PrintWriter(fwriter); 
+
+                    for (int i = 0; i < cartItems.size(); i++){
+                        outFile.println(cartItems.get(i) + ";" + 
+                        round.format((Double.parseDouble(cartPrices.get(i))) * 
+                        (Double.parseDouble(cartAmount.get(i))))); 
+                    }//end of for loop
+
+                    outFile.println("Total;" + total);
+                    outFile.close();
+
+                }//end of if statement method 
+            System.out.println("Thank you for Using our Program!");
+            System.exit(0);
+        }
+        else{
+            System.err.println("Nothing in cart!");
+        }
+    }//end of Cart 
+    
+     /**
+     * Search - Finds name of item being searched for
+     * @param s - Passes name of item being searched for
+     */
+    public void search(String s){
+        int first = 0; //The first index 
+        int last = items.size() - 1; //The last index 
+        int middle; //The midpoint of search 
+        String amount = null;
+        boolean found = false, overstock = false; //flag 
+        String choice;
+        
+        DecimalFormat round = new DecimalFormat("0.00");        
+        Scanner scanS = new Scanner(System.in);
+        Scanner scanN = new Scanner(System.in);
+
+        //Sorts array to allow easy searching
+        alphabetical();
+        
+        //Checks entire inventory for item
+        while (!found && first <= last) 
+        { 
+            middle = (first + last) / 2;//Finds middle
+            
+            //Checks to see if middle is the item ore before/after
+            if (items.get(middle).equalsIgnoreCase(s)) 
+            { 
+                //Prints out item if found
+                found = true;
+                System.out.println("    ITEM\t\t\t\tPRICE");
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                        + "~~~~~~~");
+                System.out.println((middle + 1) + ". " + items.get(middle) +
+                    "\t\t\t\t$"
+                    + round.format(Double.parseDouble((prices.get(middle)))));
+                
+                do{//Do while to error trap yes or no
+                    System.out.println("Would you like to buy this item?"
+                            + "(Yes/No)");
+                    choice = scanS.nextLine();
+                    if(!(choice.equalsIgnoreCase("Yes")) &&
+                            !(choice.equalsIgnoreCase("No"))){
+                        System.err.println("NVALID ENTRY!");
+                    }
+                }while(!(choice.equalsIgnoreCase("Yes")) && 
+                        !(choice.equalsIgnoreCase("No")));
+                
+                if(choice.equalsIgnoreCase("Yes")){
+                    do{//Do while to error trap overstock
+                        do{//Do while to error trap negative numbers
+                            System.out.println("How many would you like?");
+                            amount = scanS.nextLine();
+                            if(Integer.parseInt(amount) < 1){
+                                System.err.println("INVALID ENTRY");
+                            }
+                        }while(Integer.parseInt(amount) < 1);
+
+                        //Passes index and amount to addCart
+                        overstock = addCart((middle + 1), amount);
+
+                        if(overstock == true){
+                            System.err.println("INVALID ENTRY");
+                        }
+
+                    }while (overstock == true);
+                }
+            } 
+                
+            else if (items.get(middle).compareTo(s) > 0) 
+            { 
+                last = middle - 1;  
+            } 
+                
+            else if (items.get(middle).compareTo(s) < 0) 
+            { 
+                first = middle + 1; 
+            } 
+        }
+        
+        //Displays error message if not found
+        if (found == false){
+            System.out.println("Sorry! We do not have this item.");
+        }
+    }//End of method
+    
+    /**
+     * @method – viewLastOrder  - Displays last order
+     * @param username – Contains username which is the text file name
+     * @throws IOException 
+     */
+    public void viewLastOrder(String username) throws IOException{
+        
+        //Opens file and declares scanner
+        File myFile = new File("H:\\" + username+ "Receipts.txt");
+        Scanner readFile = new Scanner(myFile);
+        String format = "%-40s%s%n";//For indentation
+        DecimalFormat round = new DecimalFormat("0.00"); 
+         
+        System.out.println("*********************************************");
+        //Prints out last order from file
+        System.out.printf(format, "Item", "Price");
+        while(readFile.hasNext()){
+            String line = readFile.nextLine();
+            String tokens[] = line.split(";");
+            System.out.printf(format, tokens[0], 
+                    round.format(Double.parseDouble(tokens[1])));
+        }
+        
+        System.out.println("*********************************************");
+    }//end of viewLastOrder
+    
+}//end of Cart class 
+    
+
