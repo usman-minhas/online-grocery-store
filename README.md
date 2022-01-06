@@ -1,6 +1,6 @@
 # Online Grocery Store
 
-The following program is a grocery store coded in Java and designed to run in the terminal. Users can create and log into accounts, make purchases, and have their entire order history stored within a text file.
+The following program is a grocery store coded in Java and designed to run in the terminal. Users can create and log into accounts, make purchases, and have their entire order history stored within a text file. This project uses **object-oriented programming, inheritence, writing & reading text files**, was developed using **bottom up programming**, and was tested using **unit testing and module testing**.
 
 ## Welcome Screen
 The program will first open up, prompting the user to enter in whether they would want to log in or sign up. 
