@@ -1,6 +1,6 @@
 /**
  * Project: Culminating
- * Programmer: Usman Minhas
+ * Programmer: Usman Minhas, Jay Cordeiro, Sarada Sai Turaga
  * Program: Jay's NoFrills
  * Date: January 22, 2019
  * Description: This program mimics an online grocery store
